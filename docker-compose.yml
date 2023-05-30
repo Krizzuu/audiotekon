@@ -11,23 +11,20 @@ services:
       - FLASK_APP=main.py
     depends_on:
       - redis
+      - db
   redis:
     image: redis:latest
     ports:
       - "6379:6379"
   db:
-    image: mysql:5.7
+    image: mysql:8.0
     restart: always
     environment:
-      MYSQL_DATABASE: 'db'
-      MYSQL_USER: 'user'
-      MYSQL_PASSWORD: 'password'
+      MYSQL_DATABASE: 'audiotekon_db'
       MYSQL_ROOT_PASSWORD: 'password'
     ports:
       - '3306:3306'
     expose:
       - '3306'
     volumes:
-      - my-db:/var/lib/mysql
-volumes:
-  my-db: { }
+      - ./sql/:/docker-entrypoint-initdb.d/
