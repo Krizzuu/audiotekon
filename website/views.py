@@ -7,12 +7,4 @@ views = Blueprint('views', __name__)
 
 @views.route('/', methods=['GET', 'POST'])
 def home():
-    if request.method == 'POST':
-        note = request.form.get('note')#Gets the note from the HTML
-
-        if len(note) < 1:
-            flash('Note is too short!', category='error')
-        else:
-            flash('Note added!', category='success')
-
     return render_template("home.html", user=None)
