@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+
+{% block title %}
+  My Playlist
+{% endblock %}
+
+{% block content %}
+  <div class="container">
+    <h1 class="my-4">{{ user.name }}'s Playlist</h1>
+
+    <form action="{{ url_for('views.search') }}" method="POST">
+        <div class="input-group mb-3">
+          <input type="text" class="form-control" placeholder="Search for a another song..." name="query" required>
+          <div class="input-group-append">
+            <button class="btn btn-primary" type="submit">Search</button>
+          </div>
+        </div>
+    </form>
+
+    <div class="card">
+      <div class="card-header">
+        <h2>Playlist Songs</h2>
+      </div>
+      <div class="card-body">
+        <ul>
+          {% for song in user.playlist.songs %}
+            <li>
+              {{ song.name }} by {{ song.artist }}
+              {% if song.has_lyrics %}
+                (Has lyrics)
+              {% else %}
+                (No lyrics)
+              {% endif %}
+            </li>
+          {% endfor %}
+        </ul>
+      </div>
+    </div>
+  </div>
+{% endblock %}

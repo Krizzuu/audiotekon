@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+
+{% block title %}
+  Search Results
+{% endblock %}
+
+{% block content %}
+  <div class="container">
+    <h1 class="my-4">Search Results</h1>
+
+    {% if search_results %}
+      <ul>
+        {% for song in search_results %}
+          <li>
+            {{ song.track_name }} by {{ song.artist_name }}
+            <form action="{{ url_for('views.add_to_playlist') }}" method="POST">
+                <input type="hidden" name="track_id" value="{{ song.track_id }}">
+                <input type="hidden" name="name" value="{{ song.track_name }}">
+                <input type="hidden" name="artist" value="{{ song.artist_name }}">
+                <input type="hidden" name="has_lyrics" value="{{ song.has_lyrics }}">
+              <button type="submit">Add to Playlist</button>
+            </form>
+          </li>
+        {% endfor %}
+      </ul>
+    {% else %}
+      <p>No results found.</p>
+    {% endif %}
+
+    <a href="{{ url_for('views.show_library') }}">Back to Playlist</a>
+  </div>
+{% endblock %}

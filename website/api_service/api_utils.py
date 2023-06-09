@@ -1,6 +1,7 @@
 from . import API_KEY, TRACK_BASE_URL
 import json
 import requests
+from munch import DefaultMunch
 
 
 def get_tracks(keywords: str):
@@ -9,7 +10,9 @@ def get_tracks(keywords: str):
     content = json.loads(response.content.decode())
     if content['message']['header']['status_code'] != 200:
         return None
-    tracks = content['message']['body']['track_list']
+    # tracks = content['message']['body']['track_list']
+    tracks = DefaultMunch.fromDict(content['message']['body']['track_list'])
+    tracks = [track.track for track in tracks]
     return tracks
 
 

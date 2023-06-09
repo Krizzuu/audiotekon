@@ -6,8 +6,9 @@ from . import db
 class User(db.Model, UserMixin):
     id = db.Column(db.Integer, primary_key=True)
     email = db.Column(db.String(50), unique=True, nullable=False)
+    name = db.Column(db.String(20), unique=True, nullable=False)
     password_hash = db.Column(db.String(255))
-    playlist = db.relationship('Playlist')
+    playlist = db.relationship('Playlist', uselist=False, backref='user')
 
     def set_password(self, password):
         self.password_hash = generate_password_hash(password)
