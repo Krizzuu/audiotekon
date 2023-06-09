@@ -1,13 +1,20 @@
-{% extends "base.html" %} {% block title %}Home{% endblock %} {% block content
-%}
-<h1 align="center">Notes</h1>
-<ul class="list-group list-group-flush" id="notes">
+{% extends "base.html" %}
 
-</ul>
-<form method="POST">
+{% block title %}
+  Home
+{% endblock %}
 
-  <div align="center">
-    <button type="submit" class="btn btn-primary">Add Note</button>
+{% block content %}
+  <div class="jumbotron">
+    <h1 class="display-4">Autiotekon,</h1>
+    <p class="lead">your 'listen later' library.</p>
+    <hr class="my-4">
+    {% if user and user.is_authenticated %}
+      <p>Welcome back, {{ user.username }}!</p>
+      <a class="btn btn-primary btn-lg" href="/library" role="button">Go to My Library</a>
+    {% else %}
+      <p>Join us today and start managing your audios.</p>
+      <a class="btn btn-primary btn-lg" href={{ url_for('auth.sign_up') }} role="button">Sign Up</a>
+    {% endif %}
   </div>
-</form>
 {% endblock %}

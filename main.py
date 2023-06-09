@@ -1,6 +1,4 @@
 from website import create_app
-# import pydevd_pycharm
-# pydevd_pycharm.settrace('host.docker.internal', port=5678, stdoutToServer=True, stderrToServer=True)
 
 
 app = create_app()
