@@ -10,3 +10,8 @@ def home():
     import os
     api_key = os.getenv("API_KEY")
     return render_template("home.html", user=current_user)
+
+@login_required
+@views.route("/library")
+def show_library():
+    return "test"
