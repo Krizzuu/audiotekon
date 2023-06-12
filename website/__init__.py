@@ -1,11 +1,31 @@
-from flask import Flask, render_template
+from flask import Flask
 from flask_login import LoginManager
+from munch import DefaultMunch
 from redis.client import Redis
 from flask_sqlalchemy import SQLAlchemy
 
 app = Flask(__name__)
 db = SQLAlchemy()
 redis_client = Redis(host="redis", port=6379, db=0, socket_connect_timeout=2, socket_timeout=2, decode_responses=True)
+
+def add_if_doesnt_exist(song_id):
+    from website.models import Song
+    import json
+    song = Song.query.get(song_id)
+    if song:
+        return
+    song_data = redis_client.get(song_id)
+    if not song_data:
+        from website.api_service.api_utils import get_track
+        song_data = get_track(song_id)
+    else:
+        song_data = json.loads(song_data)
+        song_data = DefaultMunch.fromDict(song_data)
+
+    if not song:
+        new_song = Song(id=song_data.commontrack_id, artist=song_data.artist_name, name=song_data.track_name)
+        db.session.add(new_song)
+        db.session.commit()
 
 def create_app():
     app.config['SECRET_KEY'] = "zaq1@WSXE62137xD"

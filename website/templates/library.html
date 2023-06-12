@@ -1,39 +1,49 @@
 {% extends "base.html" %}
 
 {% block title %}
-  My Playlist
+My Playlist
 {% endblock %}
 
 {% block content %}
   <div class="container">
-    <h1 class="my-4">{{ user.name }}'s Playlist</h1>
-
-    <form action="{{ url_for('views.search') }}" method="POST">
-        <div class="input-group mb-3">
-          <input type="text" class="form-control" placeholder="Search for a another song..." name="query" required>
-          <div class="input-group-append">
-            <button class="btn btn-primary" type="submit">Search</button>
-          </div>
-        </div>
-    </form>
-
-    <div class="card">
-      <div class="card-header">
-        <h2>Playlist Songs</h2>
+  <h1 class="my-4">{{ user.name }}'s Playlist</h1>
+  
+  <form action="{{ url_for('views.search') }}" method="POST">
+    <div class="input-group mb-3">
+      <input type="text" class="form-control" placeholder="Search for a another song..." name="query" required>
+      <div class="input-group-append">
+        <button class="btn btn-primary" type="submit">Search</button>
       </div>
+    </div>
+  </form>
+  
+  <div class="card">
+    <div class="card-header">
+      <h2>Playlist Songs</h2>
+        </div>
       <div class="card-body">
-        <ul>
-          {% for song in user.playlist.songs %}
-            <li>
-              {{ song.name }} by {{ song.artist }}
-              {% if song.has_lyrics %}
-                (Has lyrics)
-              {% else %}
-                (No lyrics)
-              {% endif %}
-            </li>
-          {% endfor %}
-        </ul>
+        {% for user_song in user.songs %}
+        <div class="card">
+          <div class="card-body">
+            <h5 class="card-title">{{ user_song.song.name }}</h5>
+            <p class="card-text">{{ user_song.song.artist }}</p>
+
+            <div class="btn-group btn-group-lg" role="group" aria-label="...">
+              <form action="{{ url_for('views.mark_as_listened') }}" method="post">
+                <input type="hidden" name="song_id" value="{{ user_song.song.id }}">
+                <button type="submit" class="btn {{ 'btn-primary' if user_song.listened else 'btn-success' }}">
+                {{ 'Mark as Unlistened' if user_song.listened else 'Mark as Listened' }}
+                </button>
+              </form>
+
+              <form action="{{ url_for('views.remove_from_playlist') }}" method="post">
+                <input type="hidden" name="song_id" value="{{ user_song.song.id }}">
+                <button type="submit" class="btn btn-danger">Remove from Playlist</button>
+              </form>
+            </div>
+            </div>
+          </div>
+        {% endfor %}
       </div>
     </div>
   </div>

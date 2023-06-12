@@ -1,7 +1,7 @@
-from flask import Blueprint, render_template, session, request, flash, redirect, url_for
+from flask import Blueprint, render_template, request, flash, redirect, url_for
 from flask_login import login_required, current_user
 
-from website import redis_client, db
+from website import redis_client, db, add_if_doesnt_exist
 
 views = Blueprint('views', __name__)
 
@@ -11,7 +11,7 @@ def home():
 
 @login_required
 @views.route("/library")
-def show_library():
+def library():
     return render_template('library.html', user=current_user)
 
 
@@ -22,35 +22,80 @@ def search():
 
     # Perform API search here, get the results
     from website.api_service.api_utils import get_tracks
+    import json
     search_results = get_tracks(query)
+    for track in search_results:
+        redis_client.set(track.track_id, json.dumps(track))
     # search_results = []
     # Render the search results
-    return render_template('search_songs.html', search_results=search_results)
+    return render_template('search.html', user=current_user, search_results=search_results)
 
 @login_required
 @views.route('/add_to_playlist', methods=['POST'])
 def add_to_playlist():
     # Get the song from the database
-    song_id = request.form['track_id']
-    name = request.form['name']
-    artist = request.form['artist']
-    has_lyrics = request.form['has_lyrics']
-    from website.models import Song
+    song_id = request.form['song_id']
+    if not song_id:
+        flash('No song provided', category='error')
+        redirect(url_for('views.library'))
+
+    add_if_doesnt_exist(song_id)
+
+    from website.models import Song, UserSongs
     song = Song.query.get(song_id)
 
-    if current_user.playlist is None:
-        # Create a new playlist for the user
-        from website.models import Playlist
-        current_user.playlist = Playlist(user_id=current_user.id)
-        db.session.add(current_user.playlist)
+    user_song = UserSongs.query.filter_by(user_id=current_user.id, song_id=song.id).first()
 
-    if not song and song_id:
-        new_song = Song(id=song_id, name=name, artist=artist, has_lyrics=int(has_lyrics)!=0)
-        db.session.add(new_song)
+    if user_song:
+        flash('Song is already in your playlist.', 'error')
+    else:
+        user_song = UserSongs(user_id=current_user.id, song_id=song.id)
+        db.session.add(user_song)
+        db.session.commit()
+        flash('Song added to playlist.', 'success')
+    return redirect(url_for('views.library'))
 
-    # Add the song to the user's playlist
-    current_user.playlist.songs.append(new_song)
+@views.route('/mark_as_listened', methods=['POST'])
+@login_required
+def mark_as_listened():
+    from website.models import Song, UserSongs
+    song_id = request.form.get('song_id')
+    song = Song.query.get(song_id)
+    user_song = UserSongs.query.filter_by(user_id=current_user.id, song_id=song.id).first()
+
+    if not user_song:
+        # The song is not in the user's playlist
+        flash('Song is not in your playlist.')
+        return redirect(url_for('home'))
+
+    # Mark the song as listened
+    user_song.listened = not user_song.listened
     db.session.commit()
+    return redirect(url_for('views.library'))
 
-    flash('Song added to playlist.', 'success')
-    return redirect(url_for('views.show_library'))
+@views.route('/remove_from_playlist', methods=['POST'])
+def remove_from_playlist():
+    from website.models import Song, UserSongs
+    song_id = request.form.get('song_id')
+    song = Song.query.get(song_id)
+    user_song = UserSongs.query.filter_by(user_id=current_user.id, song_id=song.id).first()
+
+    if not user_song:
+        # The song is not in the user's playlist
+        flash('Song is not in your playlist.')
+        return redirect(url_for('home'))
+
+    # Remove the song from the user's playlist
+    db.session.delete(user_song)
+    db.session.commit()
+    return redirect(url_for('views.library'))
+
+@views.route('/user_playlist/<int:user_id>')
+def user_playlist(user_id):
+    from website.models import User, UserSongs, Song
+    user = User.query.get(user_id)
+    if user:
+        user_songs = db.session.query(Song).join(UserSongs, UserSongs.song_id == Song.id).filter(UserSongs.user_id == user_id).all()
+        return render_template('user_playlist.html', inspected_user=user, songs=user_songs)
+    else:
+        return "User not found", 404

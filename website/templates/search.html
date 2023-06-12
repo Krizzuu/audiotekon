@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+
+{% block title %}
+  Search Results
+{% endblock %}
+
+{% block content %}
+  <div class="container">
+    <h1 class="my-4">Search Results</h1>
+
+  {% if search_results %}
+    <div class="row">
+    {% for song in search_results %}
+      <div class="col-lg-4 col-md-6 mb-4">
+        <div class="card h-100">
+          <div class="card-body">
+            <h4 class="card-title">{{ song.track_name }}</h4>
+            <h6 class="card-subtitle mb-2 text-muted">{{ song.artist_name }}</h6>
+            <form action="{{ url_for('views.add_to_playlist') }}" method="POST">
+              <input type="hidden" name="song_id" value="{{ song.commontrack_id }}">
+              <button type="submit" class="btn btn-primary mt-2">Add to Playlist</button>
+            </form>
+          </div>
+        </div>
+      </div>
+    {% endfor %}
+    </div>
+  {% else %}
+    <div class="alert alert-secondary" role="alert">
+    <p>No results found.</p>
+    </div>
+  {% endif %}
+
+    <a href="{{ url_for('views.library') }}"><button type="button" class="btn btn-link">Back to playlist</button></a>
+  </div>
+{% endblock %}
