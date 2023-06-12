@@ -90,12 +90,22 @@ def remove_from_playlist():
     db.session.commit()
     return redirect(url_for('views.library'))
 
-@views.route('/user_playlist/<int:user_id>')
-def user_playlist(user_id):
+
+@views.route('/library/<string:short_id>')
+def user_library(short_id):
     from website.models import User, UserSongs, Song
-    user = User.query.get(user_id)
+    user = User.query.filter_by(short_id=short_id).first()
     if user:
-        user_songs = db.session.query(Song).join(UserSongs, UserSongs.song_id == Song.id).filter(UserSongs.user_id == user_id).all()
-        return render_template('user_playlist.html', inspected_user=user, songs=user_songs)
+        if current_user.is_authenticated and current_user.id == user.id:
+            return redirect(url_for('views.library'))
+        user_songs = db.session.query(Song).join(UserSongs, UserSongs.song_id == Song.id).filter(UserSongs.user_id == user.id).all()
+        return render_template('user_playlist.html', user=current_user, inspected_user=user, songs=user_songs)
     else:
-        return "User not found", 404
+        flash("Playlist not found", "error")
+        return redirect(url_for('views.playlists'))
+
+@views.route('/playlists')
+def playlists():
+    from website.models import User
+    users = User.query.all()
+    return render_template('all_playlists.html', users=users)

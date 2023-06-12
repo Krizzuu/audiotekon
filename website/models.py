@@ -1,5 +1,6 @@
 from flask_login import UserMixin
 from werkzeug.security import generate_password_hash, check_password_hash
+import shortuuid
 from . import db
 
 
@@ -12,6 +13,7 @@ class UserSongs(db.Model):
 
 class User(db.Model, UserMixin):
     id = db.Column(db.Integer, primary_key=True)
+    short_id = db.Column(db.String(22), unique=True, nullable=False, default=shortuuid.uuid)
     email = db.Column(db.String(50), unique=True, nullable=False)
     name = db.Column(db.String(20), unique=True, nullable=False)
     password_hash = db.Column(db.String(255))

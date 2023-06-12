@@ -12,9 +12,11 @@
     {% if user and user.is_authenticated %}
       <p>Welcome back, {{ user.username }}!</p>
       <a class="btn btn-primary btn-lg" href="/library" role="button">Go to My Library</a>
+      <a class="btn btn-primary btn-lg" href="/playlists" role="button">Browse libraries</a>
     {% else %}
       <p>Join us today and start managing your audios.</p>
       <a class="btn btn-primary btn-lg" href={{ url_for('auth.sign_up') }} role="button">Sign Up</a>
+      <a class="btn btn-primary btn-lg" href="/playlists" role="button">Browse libraries</a>
     {% endif %}
   </div>
 {% endblock %}
