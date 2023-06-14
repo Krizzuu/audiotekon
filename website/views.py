@@ -108,4 +108,4 @@ def user_library(short_id):
 def playlists():
     from website.models import User
     users = User.query.all()
-    return render_template('all_playlists.html', users=users)
+    return render_template('all_playlists.html', user=current_user, users=users)
