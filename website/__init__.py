@@ -1,12 +1,13 @@
 from flask import Flask
 from flask_login import LoginManager
 from munch import DefaultMunch
-from redis.client import Redis
 from flask_sqlalchemy import SQLAlchemy
+
+from website.redis_wrapper import RedisWrapper
 
 app = Flask(__name__)
 db = SQLAlchemy()
-redis_client = Redis(host="redis", port=6379, db=0, socket_connect_timeout=2, socket_timeout=2, decode_responses=True)
+redis_client = RedisWrapper()
 
 def add_if_doesnt_exist(song_id):
     from website.models import Song

@@ -23,9 +23,15 @@ def search():
     # Perform API search here, get the results
     from website.api_service.api_utils import get_tracks
     import json
-    search_results = get_tracks(query)
-    for track in search_results:
-        redis_client.set(track.track_id, json.dumps(track))
+    from threading import Thread
+    try:
+        search_results = get_tracks(query)
+        for track in search_results:
+            th = Thread(target=redis_client.set, args=(track.track_id, json.dumps(track),))
+            th.start()
+            # redis_client.set()
+    except ValueError as e:
+        return render_template('error-api.html', user=current_user, message=str(e))
     # search_results = []
     # Render the search results
     return render_template('search.html', user=current_user, search_results=search_results)

@@ -5,6 +5,8 @@ from munch import DefaultMunch
 
 
 def get_tracks(keywords: str):
+    if API_KEY == "YOUR_API_KEY_HERE":
+        raise ValueError("Invalid API provided")
     url = TRACK_SEARCH_BASE_URL + keywords + f"&apikey={API_KEY}&s_track_rating=desc"
     response = requests.get(url)
     content = json.loads(response.content.decode())
@@ -16,6 +18,8 @@ def get_tracks(keywords: str):
     return tracks
 
 def get_track(id):
+    if API_KEY == "YOUR_API_KEY_HERE":
+        raise ValueError("Invalid API provided")
     url = TRACK_GET_BASE_URL + id + f"&apikey={API_KEY}"
     response = requests.get(url)
     content = json.loads(response.content.decode())
